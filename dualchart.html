@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="style.css"> 
+
+<script>
+		function makeTicks(xmax, x2max, n) {
+		if (xmax < 0 || x2max < 0) return [0];
+		h = xmax/n; h2 = x2max/n;
+		base = Math.floor(Math.log10(h));
+		base2 = Math.floor(Math.log10(h2));
+		h = Math.round(h/Math.pow(10, base))*Math.pow(10, base);
+		h2 = Math.round(h2/Math.pow(10, base2))*Math.pow(10, base2);
+		ticks = [];
+		ticksstr = [];
+		for(var i=0; h*(i-1) < xmax || h2*(i-1) < x2max; i++) {
+			ticks.push(h*i);
+			ticksstr.push((h*i).toFixed(base < 0 ? 1:-base+1));
+		}
+		return [ticks, ticksstr];
+	}
+
+	function sign(x) {
+		if(x>0) return 1;
+		if(x<0) return -1;
+		return 0;
+	}
+
+	function drawTicks(axis, ticks, ticklabels, ff, f0, gf, g0, max, marg) {
+		altaxis = axis == 'x' ? 'y':'x';
+		realaxis = axis == 'z' ? 'y':axis;
+		xgrid = document.getElementById(axis+'_grid');
+		while(xgrid.firstChild) xgrid.removeChild(xgrid.firstChild);
+
+		labels = document.getElementById(axis+'_labels');
+		while(labels.children.length>1) labels.removeChild(labels.lastChild);
+
+		gfl = (axis=='z'?gf:g0) + (axis=='y'?-1:1)*marg;
+
+		for (i in ticks) {
+			line = document.createElementNS('http://www.w3.org/2000/svg','line');
+			line.setAttribute(altaxis+'1', gf); line.setAttribute(altaxis+'2', g0);
+			fp = f0 + (ff-f0)/(max-0)*ticks[i];
+			line.setAttribute(realaxis+'1', fp);
+			line.setAttribute(realaxis+'2', fp);
+			line.setAttribute('class', 'grid');
+			xgrid.append(line);
+
+			label = document.createElementNS('http://www.w3.org/2000/svg','text');
+			label.setAttribute(altaxis, gfl);
+			label.setAttribute(realaxis, fp);
+			label.innerHTML = i==0 ? '0' : ticklabels[i];
+			labels.append(label);
+		}
+	}
+
+		
+	function removeElementsByClass(className){
+	    var elements = document.getElementsByClassName(className);
+	    while(elements.length > 0){
+	        elements[0].parentNode.removeChild(elements[0]);
+	    }
+	}
+
+	function svglen(svg, v) {
+		l = svg.createSVGLength();
+		l.baseVal = v;
+		l.animVal = v;
+		return l;
+	}
+
+	function drawchart1(x,y,z) {
+		svg = document.getElementById('chart_position');
+		x_axis = document.getElementById('x_axis');
+		y_axis = document.getElementById('y_axis');
+		x0 = Math.min(y_axis.x1.baseVal.value, y_axis.x2.baseVal.value);
+		xf = Math.max(y_axis.x1.baseVal.value, y_axis.x2.baseVal.value);
+		y0 = Math.max(x_axis.y1.baseVal.value, x_axis.y2.baseVal.value);
+		yf = Math.min(x_axis.y1.baseVal.value, x_axis.y2.baseVal.value);
+		z0 = y0; zf = yf;
+
+		y_line = document.getElementById('y_line');
+		z_line = document.getElementById('z_line');
+		y_line.setAttribute("points",""); // I don't like it, but it does clear the points
+		z_line.setAttribute("points",""); // I don't like it, but it does clear the points
+
+		[xticks, xticklabels] = makeTicks(Math.max(...x), Math.max(...x), 9);
+		[yticks, yticklabels] = makeTicks(Math.max(...y), Math.max(...z), 6);
+		[zticks, zticklabels] = makeTicks(Math.max(...z), Math.max(...y), 6);
+		xmax = xticks[xticks.length-1];
+		ymax = yticks[yticks.length-1];
+		zmax = zticks[zticks.length-1];
+
+		drawTicks('x', xticks, xticklabels, xf, x0, yf, y0, xmax, 15);
+		drawTicks('y', yticks, yticklabels, yf, y0, xf, x0, ymax, 5);
+		drawTicks('z', zticks, zticklabels, zf, z0, xf, x0, zmax, 5);
+
+		for (i in x) {
+			var pty = svg.createSVGPoint();
+			var ptz = svg.createSVGPoint();
+			pty.x = ptz.x = x0 + (xf-x0)/(xmax-0)*x[i];
+			pty.y = y0 + (yf-y0)/(ymax-0)*y[i];
+			ptz.y = z0 + (zf-z0)/(zmax-0)*z[i];
+			y_line.points.appendItem(pty);
+			z_line.points.appendItem(ptz);
+		}
+	}
+
+	function thonload() {
+		drawchart1(
+		x = [0,2,4,5],
+		y = [0,1.5,5,4.5],
+		z = [12,24,18,8] );
+	}
+</script>
+
+<body onload="thonload()">
+<svg version="1.2" class="graph" id='chart_position' aria-labelledby="title" role="img">
+  <title id="title">Position/Velocity Data</title>
+
+<g class="x-grid" id="xAxes">
+  <line id="x_axis" class="axes" x1="50" x2="50" y1="20" y2="371"></line>
+</g>
+<g class="y-grid" id="yAxes">
+  <line id="y_axis" class="axes" x1="50" x2="705" y1=371 y2=371></line>
+</g>
+
+<g class="x-grid" id="x_grid">
+  <line class="grid" x1=100 y1=371 x2=100 y2=5 />
+  <line class="grid" x1=246 y1=371 x2=246 y2=5 />
+  <line class="grid" x1=392 y1=371 x2=392 y2=5 />
+  <line class="grid" x1=538 y1=371 x2=538 y2=5 />
+  <line class="grid" x1=684 y1=371 x2=684 y2=5 />
+</g>
+<g class="y-grid" id="y_grid">
+  <line class="grid" x1=50 y1=246 x2=705 y2=246 />
+  <line class="grid" x1=50 y1=129 x2=705 y2=129 />
+  <line class="grid" x1=50 y1=13 x2=705 y2=13 />
+</g>
+<g class="z-grid" id="z_grid">
+  <line class="grid" x1=50 y1=246 x2=705 y2=246 />
+  <line class="grid" x1=50 y1=129 x2=705 y2=129 />
+  <line class="grid" x1=50 y1=13 x2=705 y2=13 />
+</g>
+  <g class="labels x-labels" id='x_labels'>
+  <text x="400" y="415" class="label-title">Time [s]</text>
+  <text x="100" y="400">1</text>
+  <text x="246" y="400">2</text>
+  <text x="392" y="400">3</text>
+  <text x="538" y="400">4</text>
+  <text x="684" y="400">5</text>
+</g>
+<g class="labels y-labels" id='y_labels'>
+  <text x="-180" y="10" class="label-title" transform="rotate(270)">Position</text>
+  <text x="40" y="13">15</text>
+  <text x="40" y="129">10</text>
+  <text x="40" y="246">5</text>
+  <text x="40" y="371">0</text>
+</g>
+<g class="labels z-labels" id='z_labels'>
+  <text x="-180" y="760" class="label-title" transform="rotate(270)">Velocity</text>
+  <text x="40" y="13">15</text>
+  <text x="40" y="129">10</text>
+  <text x="40" y="246">5</text>
+  <text x="40" y="371">0</text>
+</g>
+<polyline
+	id='y_line'
+	fill='none'
+	stroke='#0074d9'
+	stroke-width=2
+	points="
+		50,5
+		400,120
+		705,371
+	"/>
+<polyline
+	id='z_line'
+	fill='none'
+	stroke='#d91200'
+	stroke-width=2
+	points="
+		50,5
+		400,120
+		705,371
+	"/>
+
+</svg>
+
+</body>
