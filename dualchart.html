@@ -60,7 +60,7 @@
 		for (i in ticklabels) {
 			line = document.createElementNS('http://www.w3.org/2000/svg','line');
 			line.setAttribute(altaxis+'1', gf); line.setAttribute(altaxis+'2', g0);
-			fp = f0 + (ff-f0)*(i/ticklabels.length);
+			fp = f0 + (ff-f0)*(i/(ticklabels.length-1));
 			line.setAttribute(realaxis+'1', fp);
 			line.setAttribute(realaxis+'2', fp);
 			line.setAttribute('class', 'grid');
