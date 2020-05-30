@@ -1,0 +1,47 @@
+.output-plot {
+  background-color: #b5e0a0;
+}
+
+
+.plot {
+  margin: 10px;
+}
+
+.plot-background {
+  fill: #e5f0e0;
+}
+
+.plot-axis {
+  stroke: #333;
+  stroke-dasharray: 0;
+  stroke-width: 1.5;
+}
+
+.plot-grid {
+  stroke: #ccc;
+  stroke-dasharray: 0;
+  stroke-width: 1;
+}
+
+.plot-labels {
+  font-size: 13px;
+}
+.plot-axlabels {
+  font-size: 10px;
+}
+
+.plot-titlelabel {
+  font-weight: bold;
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.plot-querybar {
+  stroke: #55a040;
+  stroke-width: 2;
+}
+
+.plot-markerbar {
+  stroke: #333;
+  stroke-width: 2;
+}
